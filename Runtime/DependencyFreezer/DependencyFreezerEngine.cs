@@ -300,7 +300,6 @@ public sealed class DependencyFreezerEngine : IDisposable
         var snapshots = new List<PackageStatusSnapshot>(packageNames.Length);
         foreach (var packageName in packageNames)
         {
-            manifest.TryGetDependency(packageName);
             var currentDependency = manifest.TryGetDependency(packageName);
             frozenLock.Packages.TryGetValue(packageName, out var lockEntry);
             packagesLock.TryGetValue(packageName, out var packageLockEntry);

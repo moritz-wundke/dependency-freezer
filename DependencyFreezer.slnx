@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/DependencyFreezer.Tests/DependencyFreezer.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Tools/DependencyFreezer.Cli/DependencyFreezer.Cli.csproj" />
+  </Folder>
+</Solution>

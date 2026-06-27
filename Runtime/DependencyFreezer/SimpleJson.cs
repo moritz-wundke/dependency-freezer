@@ -44,7 +44,7 @@ internal static class SimpleJson
         {
             int number => number,
             long number when number >= int.MinValue && number <= int.MaxValue => (int)number,
-            double number when number >= int.MinValue && number <= int.MaxValue && Math.Abs(number % 1d) < double.Epsilon => (int)number,
+            double number when number >= int.MinValue && number <= int.MaxValue && number == Math.Floor(number) => (int)number,
             string text when int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number) => number,
             _ => null,
         };

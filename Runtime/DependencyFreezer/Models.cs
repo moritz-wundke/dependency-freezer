@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DependencyFreezer;
+namespace DependencyFreezer
+{
 
 public enum DependencySourceKind
 {
@@ -98,31 +102,31 @@ public sealed class FrozenLockFile
 
 public sealed class FrozenPackageLockEntry
 {
-    public required string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
-    public required string Version { get; set; }
+    public string Version { get; set; } = string.Empty;
 
-    public required string OriginalReference { get; set; }
+    public string OriginalReference { get; set; } = string.Empty;
 
-    public required DependencySourceKind OriginalSourceKind { get; set; }
+    public DependencySourceKind OriginalSourceKind { get; set; }
 
-    public required bool WasDirectDependency { get; set; }
+    public bool WasDirectDependency { get; set; }
 
-    public required FreezeMode FreezeMode { get; set; }
+    public FreezeMode FreezeMode { get; set; }
 
-    public required string RegistryUrl { get; set; }
+    public string RegistryUrl { get; set; } = string.Empty;
 
-    public required string TarballUrl { get; set; }
+    public string TarballUrl { get; set; } = string.Empty;
 
-    public required string Integrity { get; set; }
+    public string Integrity { get; set; } = string.Empty;
 
-    public required string EmbeddedPath { get; set; }
+    public string EmbeddedPath { get; set; } = string.Empty;
 
-    public required string DirectoryHash { get; set; }
+    public string DirectoryHash { get; set; } = string.Empty;
 
-    public required List<string> Dependencies { get; set; }
+    public List<string> Dependencies { get; set; } = new();
 
-    public required List<string> RequestedBy { get; set; }
+    public List<string> RequestedBy { get; set; } = new();
 
     public DateTimeOffset FrozenAt { get; set; } = DateTimeOffset.UtcNow;
 }
@@ -192,4 +196,5 @@ internal static class DependencyFreezerJson
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
+}
 }

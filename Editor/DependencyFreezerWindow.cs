@@ -6,7 +6,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace DependencyFreezer.Editor;
+namespace DependencyFreezer.Editor
+{
 
 public sealed class DependencyFreezerWindow : EditorWindow
 {
@@ -175,5 +176,6 @@ public sealed class DependencyFreezerWindow : EditorWindow
     }
 
     private static string GetProjectRoot() => Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+}
 }
 #endif

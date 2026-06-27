@@ -1,6 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace DependencyFreezer;
+namespace DependencyFreezer
+{
 
 internal static class FrozenLockFileStore
 {
@@ -39,4 +45,5 @@ internal static class FrozenLockFileStore
 
         File.Move(tempPath, path, true);
     }
+}
 }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace DependencyFreezer
 {
@@ -186,15 +184,5 @@ internal static class DependencySourceClassifier
 
         return DependencySourceKind.Unknown;
     }
-}
-
-internal static class DependencyFreezerJson
-{
-    public static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    };
 }
 }

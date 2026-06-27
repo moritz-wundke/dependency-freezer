@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json.Nodes;
 
 namespace DependencyFreezer
 {
@@ -96,10 +95,9 @@ namespace DependencyFreezer
                 throw new InvalidOperationException($"Embedded package '{extractedDirectory}' is missing package.json.");
             }
 
-            var packageNode = JsonNode.Parse(File.ReadAllText(packageJsonPath))?.AsObject()
-                ?? throw new InvalidOperationException($"Embedded package '{extractedDirectory}' has an invalid package.json.");
-            var name = packageNode["name"]?.GetValue<string>() ?? throw new InvalidOperationException($"Embedded package '{extractedDirectory}' package.json is missing a name.");
-            var version = packageNode["version"]?.GetValue<string>() ?? throw new InvalidOperationException($"Embedded package '{extractedDirectory}' package.json is missing a version.");
+            var packageNode = SimpleJson.ParseObject(File.ReadAllText(packageJsonPath));
+            var name = SimpleJson.ReadString(packageNode.TryGetValue("name", out var nameValue) ? nameValue : null) ?? throw new InvalidOperationException($"Embedded package '{extractedDirectory}' package.json is missing a name.");
+            var version = SimpleJson.ReadString(packageNode.TryGetValue("version", out var versionValue) ? versionValue : null) ?? throw new InvalidOperationException($"Embedded package '{extractedDirectory}' package.json is missing a version.");
             return (name, version);
         }
 

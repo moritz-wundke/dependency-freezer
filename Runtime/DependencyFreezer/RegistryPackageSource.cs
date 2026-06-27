@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Security.Cryptography;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,28 +20,32 @@ namespace DependencyFreezer
         {
             var normalizedRegistryUrl = registryUrl.TrimEnd('/');
             var requestUri = $"{normalizedRegistryUrl}/{Uri.EscapeDataString(packageName)}/{Uri.EscapeDataString(version)}";
-            var metadata = await _httpClient.GetFromJsonAsync<JsonObject>(requestUri, cancellationToken).ConfigureAwait(false)
-                ?? throw new InvalidOperationException($"Registry '{normalizedRegistryUrl}' returned an empty metadata document for '{packageName}@{version}'.");
+            using var response = await _httpClient.GetAsync(requestUri, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var payload = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            var metadata = SimpleJson.ParseObject(payload);
 
-            var dist = metadata["dist"] as JsonObject ?? throw new InvalidOperationException($"Registry '{normalizedRegistryUrl}' did not return dist metadata for '{packageName}@{version}'.");
-            var tarballUrl = dist["tarball"]?.GetValue<string>();
+            var dist = metadata.TryGetValue("dist", out var distValue) ? distValue as Dictionary<string, object?> : null;
+            if (dist is null)
+            {
+                throw new InvalidOperationException($"Registry '{normalizedRegistryUrl}' did not return dist metadata for '{packageName}@{version}'.");
+            }
+
+            var tarballUrl = SimpleJson.ReadString(dist.TryGetValue("tarball", out var tarballValue) ? tarballValue : null);
             if (string.IsNullOrWhiteSpace(tarballUrl))
             {
                 throw new InvalidOperationException($"Registry '{normalizedRegistryUrl}' did not provide a tarball URL for '{packageName}@{version}'.");
             }
 
-            var dependencies = (metadata["dependencies"] as JsonObject)?
-                .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value?.GetValue<string>() ?? string.Empty))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.Ordinal)
-                ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            var dependencies = SimpleJson.ReadStringMap(metadata.TryGetValue("dependencies", out var dependenciesValue) ? dependenciesValue : null);
 
             return new RegistryPackageMetadata(
-                metadata["name"]?.GetValue<string>() ?? packageName,
-                metadata["version"]?.GetValue<string>() ?? version,
+                SimpleJson.ReadString(metadata.TryGetValue("name", out var nameValue) ? nameValue : null) ?? packageName,
+                SimpleJson.ReadString(metadata.TryGetValue("version", out var versionValue) ? versionValue : null) ?? version,
                 normalizedRegistryUrl,
                 tarballUrl,
-                dist["integrity"]?.GetValue<string>(),
-                dist["shasum"]?.GetValue<string>(),
+                SimpleJson.ReadString(dist.TryGetValue("integrity", out var integrityValue) ? integrityValue : null),
+                SimpleJson.ReadString(dist.TryGetValue("shasum", out var shasumValue) ? shasumValue : null),
                 dependencies);
         }
 

@@ -2,14 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using DependencyFreezer;
 
 return await ProgramEntryPoint.RunAsync(args).ConfigureAwait(false);
 
 internal static class ProgramEntryPoint
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+
     public static async Task<int> RunAsync(string[] args)
     {
         if (args.Length == 0)
@@ -31,31 +39,31 @@ internal static class ProgramEntryPoint
                 case "freeze":
                 {
                     var result = await engine.FreezeAsync(new FreezeRequest(projectPath, packageNames.Count == 0 ? null : packageNames)).ConfigureAwait(false);
-                    Console.WriteLine(JsonSerializer.Serialize(result, DependencyFreezerJson.SerializerOptions));
+                    Console.WriteLine(JsonSerializer.Serialize(result, SerializerOptions));
                     return 0;
                 }
                 case "unfreeze-preview":
                 {
                     var preview = await engine.PreviewUnfreezeAsync(new UnfreezeRequest(projectPath, packageNames.Count == 0 ? null : packageNames, options.ContainsKey("all"))).ConfigureAwait(false);
-                    Console.WriteLine(JsonSerializer.Serialize(preview, DependencyFreezerJson.SerializerOptions));
+                    Console.WriteLine(JsonSerializer.Serialize(preview, SerializerOptions));
                     return preview.CanProceed ? 0 : 2;
                 }
                 case "unfreeze":
                 {
                     var result = await engine.UnfreezeAsync(new UnfreezeRequest(projectPath, packageNames.Count == 0 ? null : packageNames, options.ContainsKey("all"))).ConfigureAwait(false);
-                    Console.WriteLine(JsonSerializer.Serialize(result, DependencyFreezerJson.SerializerOptions));
+                    Console.WriteLine(JsonSerializer.Serialize(result, SerializerOptions));
                     return 0;
                 }
                 case "validate":
                 {
                     var result = await engine.ValidateAsync(projectPath).ConfigureAwait(false);
-                    Console.WriteLine(JsonSerializer.Serialize(result, DependencyFreezerJson.SerializerOptions));
+                    Console.WriteLine(JsonSerializer.Serialize(result, SerializerOptions));
                     return result.Success ? 0 : 3;
                 }
                 case "inspect":
                 {
                     var result = await engine.InspectAsync(projectPath).ConfigureAwait(false);
-                    Console.WriteLine(JsonSerializer.Serialize(result, DependencyFreezerJson.SerializerOptions));
+                    Console.WriteLine(JsonSerializer.Serialize(result, SerializerOptions));
                     return 0;
                 }
                 default:
